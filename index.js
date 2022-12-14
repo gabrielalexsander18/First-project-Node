@@ -1,9 +1,11 @@
 const express = require('express')
 const uuid = require('uuid')
+const cors = require('cors')
 
-const port = 3000
+const port = 3001
 const server = express()
 server.use(express.json())
+server.use(cors())
 
 const users = []
 
@@ -27,21 +29,27 @@ server.get('/users', (request, response) => {
 })
 
 server.post('/users', (request, response) => {
-    const { name, age, sex } = request.body
+try {
+    const { name, age } = request.body
 
-    const user = { id: uuid.v4(), name, age, sex }
+    // if(age < 18) throw new Error("Only allowed users over 18 years old")
+
+    const user = { id: uuid.v4(), name, age }
 
     users.push(user)
 
-    return response.status(201).json(user)
-})
+    return response.status(201).json(user);
+} catch(err){
+    return response.status(400).json({error:err.message});
+}
+}) 
 
 server.put('/users/:id', checkUserId, (request, response) => {
     const index = request.userIndex
     const id = request.userId
-    const { name, age, sex } = request.body
+    const { name, age } = request.body
 
-    const userUpdate = { id , name, age, sex }
+    const userUpdate = { id , name, age }
 
     users[index] = userUpdate
 
@@ -59,5 +67,5 @@ server.delete('/users/:id', checkUserId, (request, response) => {
 
 
 server.listen(port, () => {
-    console.log(`🟢  server on the port ${port}`)
+    console.log(`🚀 server on the port ${port}`)
 })
